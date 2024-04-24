@@ -1,7 +1,7 @@
 // module imports
 
 // file imports
-import ProfileModel from './model';
+import HelperModel from './model';
 import { Element } from './interface';
 import { ErrorHandler } from '../../middlewares/error-handler';
 
@@ -10,8 +10,8 @@ import { ErrorHandler } from '../../middlewares/error-handler';
  * @param {Object} elementObj element data
  * @returns {Object} element data
  */
-export const addElement = async (elementObj: Element) => {
-  return await ProfileModel.create(elementObj);
+export const addHelper = async (elementObj: Element) => {
+  return await HelperModel.create(elementObj);
 };
 
 /**
@@ -19,8 +19,8 @@ export const addElement = async (elementObj: Element) => {
  * @param {Object} query element data
  * @returns {Boolean} element existence status
  */
-export const checkElementExistence = async (query: Partial<Element>) => {
+export const checkHelperExistence = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler('Please enter query!', 400);
-  return await ProfileModel.exists(query);
+  return await HelperModel.exists(query);
 };

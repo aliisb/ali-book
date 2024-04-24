@@ -1,12 +1,12 @@
 // module imports
 // import admin from "firebase-admin";
-import { Server } from "socket.io";
-import { Response, NextFunction } from "express";
+import { Server } from 'socket.io';
+import { Response, NextFunction } from 'express';
 
 // file imports
-import * as userController from "../modules/user/controller";
-import { IRequest } from "../configs/types";
-import serviceAccount from "../services/backend-boilerplate-official-firebase-adminsdk-o1ajl-593da86247.json";
+import * as userController from '../modules/user/controller';
+import { IRequest } from '../configs/types';
+import serviceAccount from '../services/backend-boilerplate-official-firebase-adminsdk-o1ajl-593da86247.json';
 
 // variable initializations
 // const connection = admin.initializeApp({
@@ -66,33 +66,33 @@ class SocketManager {
     const { server, app } = params;
     const io = new Server(server, {
       cors: {
-        origin: ["http://localhost:3000", "https://admin.app.com"],
+        origin: ['http://localhost:3000', 'https://admin.app.com'],
       },
     });
     socketIO = io;
-    io.on("connection", (socket: any) => {
-      socket.on("join", async (data: any) => {
+    io.on('connection', (socket: any) => {
+      socket.on('join', async (data: any) => {
         socket.join(data);
         console.log(`${data} joined`);
         try {
           const args = { isOnline: true };
-          await userController.updateElementById(data, args);
+          await userController.updateUserById(data, args);
         } catch (error) {
           console.log(error);
         }
       });
-      socket.on("leave", async (data: any) => {
+      socket.on('leave', async (data: any) => {
         socket.leave();
         console.log(`${data} left`);
         try {
           const args = { user: data, isOnline: false };
-          await userController.updateElementById(data, args);
+          await userController.updateUserById(data, args);
         } catch (error) {
           console.log(error);
         }
       });
-      socket.on("disconnect", (reason: any) => {
-        console.log("user disconnected " + reason);
+      socket.on('disconnect', (reason: any) => {
+        console.log('user disconnected ' + reason);
       });
     });
 

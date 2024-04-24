@@ -1,16 +1,16 @@
 // module imports
-import { isValidObjectId, Types } from "mongoose";
+import { isValidObjectId, Types } from 'mongoose';
 
 // file imports
-import ElementModel from "./model";
-import * as conversationController from "../conversation/controller";
-import * as userController from "../user/controller";
-import { Element } from "./interface";
-import { GetMessagesDTO, SendMessageDTO } from "./dto";
-import { sendNewMessageNotification } from "../notification/controller";
-import { MongoID } from "../../configs/types";
-import { MESSAGE_STATUSES } from "../../configs/enum";
-import { ErrorHandler } from "../../middlewares/error-handler";
+import ElementModel from './model';
+import * as conversationController from '../conversation/controller';
+import * as userController from '../user/controller';
+import { Element } from './interface';
+import { GetMessagesDTO, SendMessageDTO } from './dto';
+import { sendNewMessageNotification } from '../notification/controller';
+import { MongoID } from '../../configs/types';
+import { MESSAGE_STATUSES } from '../../configs/enum';
+import { ErrorHandler } from '../../middlewares/error-handler';
 
 // destructuring assignments
 const { READ } = MESSAGE_STATUSES;
@@ -35,15 +35,15 @@ export const updateElementById = async (
   element: MongoID,
   elementObj: Partial<Element>
 ) => {
-  if (!element) throw new ErrorHandler("Please enter element id!", 400);
+  if (!element) throw new ErrorHandler('Please enter element id!', 400);
   if (!isValidObjectId(element))
-    throw new ErrorHandler("Please enter valid element id!", 400);
+    throw new ErrorHandler('Please enter valid element id!', 400);
   const elementExists = await ElementModel.findByIdAndUpdate(
     element,
     elementObj,
     { new: true }
   );
-  if (!elementExists) throw new ErrorHandler("element not found!", 404);
+  if (!elementExists) throw new ErrorHandler('element not found!', 404);
   return elementExists;
 };
 
@@ -60,32 +60,32 @@ export const getElements = async (params: GetMessagesDTO) => {
   const query: any = {};
   if (conversation)
     query.conversation =
-      typeof conversation === "string"
+      typeof conversation === 'string'
         ? new ObjectId(conversation)
         : conversation;
   else if (user1 && user2) {
-    if (typeof user1 === "string") user1 = new ObjectId(user1);
-    if (typeof user2 === "string") user2 = new ObjectId(user2);
+    if (typeof user1 === 'string') user1 = new ObjectId(user1);
+    if (typeof user2 === 'string') user2 = new ObjectId(user2);
     query.$or = [
       { $and: [{ userTo: user1 }, { userFrom: user2 }] },
       { $and: [{ userFrom: user1 }, { userTo: user2 }] },
     ];
-  } else throw new ErrorHandler("Please enter conversation id!", 400);
+  } else throw new ErrorHandler('Please enter conversation id!', 400);
   const [result] = await ElementModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
     {
       $facet: {
-        totalCount: [{ $count: "totalCount" }],
+        totalCount: [{ $count: 'totalCount' }],
         data: [{ $skip: page * limit }, { $limit: limit }],
       },
     },
-    { $unwind: "$totalCount" },
+    { $unwind: '$totalCount' },
     {
       $project: {
-        totalCount: "$totalCount.totalCount",
-        totalPages: { $ceil: { $divide: ["$totalCount.totalCount", limit] } },
+        totalCount: '$totalCount.totalCount',
+        totalPages: { $ceil: { $divide: ['$totalCount.totalCount', limit] } },
         data: 1,
       },
     },
@@ -137,12 +137,12 @@ export const send = async (params: SendMessageDTO) => {
 export const readMessages = async (params: Partial<Element>): Promise<void> => {
   const { conversation, userTo } = params;
   const messageObj = { status: READ };
-  if (!userTo) throw new ErrorHandler("Please enter userTo id!", 400);
-  if (!(await userController.checkElementExistence({ _id: userTo })))
-    throw new ErrorHandler("Please enter valid userTo id!", 400);
+  if (!userTo) throw new ErrorHandler('Please enter userTo id!', 400);
+  if (!(await userController.checkUserExistence({ _id: userTo })))
+    throw new ErrorHandler('Please enter valid userTo id!', 400);
   if (!conversation)
-    throw new ErrorHandler("Please enter conversation id!", 400);
+    throw new ErrorHandler('Please enter conversation id!', 400);
   if (!(await conversationController.getElementById(conversation)))
-    throw new ErrorHandler("Please enter valid conversation id!", 400);
+    throw new ErrorHandler('Please enter valid conversation id!', 400);
   await ElementModel.updateMany({ conversation, userTo }, messageObj);
 };

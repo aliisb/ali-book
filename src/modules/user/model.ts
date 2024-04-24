@@ -1,10 +1,10 @@
 // module imports
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // file imports
-import { USER_STATUSES, USER_TYPES, GEO_JSON_TYPES } from "../../configs/enum";
+import { USER_STATUSES, USER_TYPES, GEO_JSON_TYPES } from '../../configs/enum';
 
 // destructuring assignments
 const { ACTIVE } = USER_STATUSES;
@@ -16,8 +16,8 @@ const Schema = mongoose.Schema;
 const model = mongoose.model;
 
 const fcm = {
-  device: { type: String, required: [true, "Please enter FCM device id!"] },
-  token: { type: String, required: [true, "Please enter FCM token!"] },
+  device: { type: String, required: [true, 'Please enter FCM device id!'] },
+  token: { type: String, required: [true, 'Please enter FCM token!'] },
 };
 
 const userSchema = new Schema(
@@ -26,7 +26,7 @@ const userSchema = new Schema(
       type: String,
       lowercase: true,
       trim: true,
-      required: [true, "Please enter email address!"],
+      required: [true, 'Please enter email address!'],
       unique: true,
       validate: {
         validator: function (v: string) {
@@ -112,9 +112,9 @@ const userSchema = new Schema(
       type: Date,
       select: false,
     },
-    profile: {
+    helper: {
       type: Schema.Types.ObjectId,
-      ref: "profiles",
+      ref: 'helpers',
       select: false,
       index: true,
     },
@@ -144,13 +144,13 @@ const userSchema = new Schema(
 userSchema.methods.getSignedjwtToken = function () {
   return jwt.sign(
     { _id: this._id, type: this.type },
-    process.env.JWT_SECRET || ""
+    process.env.JWT_SECRET || ''
   );
 };
 
 userSchema.methods.populate = async function (field: string) {
-  if (field === SUPER_ADMIN || this.type === SUPER_ADMIN) field = "";
-  return await model("users", userSchema)
+  if (field === SUPER_ADMIN || this.type === SUPER_ADMIN) field = '';
+  return await model('users', userSchema)
     .findById(this._id)
     .populate(field ?? this.type);
 };
@@ -162,10 +162,10 @@ userSchema.methods.setPassword = async function (newPassword: string) {
 };
 
 userSchema.methods.validatePassword = async function (enteredPassword: string) {
-  const userExists = await model("users", userSchema)
+  const userExists = await model('users', userSchema)
     .findById(this._id, { password: 1 })
-    .select("+password");
-  return await bcrypt.compare(enteredPassword, userExists?.password || "");
+    .select('+password');
+  return await bcrypt.compare(enteredPassword, userExists?.password || '');
 };
 
-export default model("users", userSchema);
+export default model('users', userSchema);

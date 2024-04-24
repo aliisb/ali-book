@@ -1,67 +1,81 @@
 // module imports
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId } from 'mongoose';
 
 // file imports
-import ElementModel from "./model";
-import FilesRemover from "../../utils/files-remover";
-import * as profileController from "../profile/controller";
-import { Element } from "./interface";
-import { MongoID } from "../../configs/types";
-import { USER_TYPES } from "../../configs/enum";
-import { ErrorHandler } from "../../middlewares/error-handler";
+import UserModel from './model';
+import FilesRemover from '../../utils/files-remover';
+import * as helperController from '../helper/controller';
+import { User } from './interface';
+import { MongoID } from '../../configs/types';
+import { USER_TYPES } from '../../configs/enum';
+import { ErrorHandler } from '../../middlewares/error-handler';
 import {
   GetUsersDTO,
   getUserDTO,
   getUserProfileDTO,
   updateUserDTO,
-} from "./dto";
+} from './dto';
 
 // destructuring assignments
 const { ADMIN } = USER_TYPES;
 
 /**
- * @description Add element
- * @param {Object} elementObj element data
- * @returns {Object} element data
+ * @description Add user
+ * @param {Object} userObj user data
+ * @returns {Object} user data
  */
-export const addElement = async (elementObj: Element) => {
-  const { password } = elementObj;
-  const user: any = await ElementModel.create(elementObj);
+export const addUser = async (userObj: User) => {
+  const { password } = userObj;
+  const user: any = await UserModel.create(userObj);
   await user.setPassword(password);
   return user;
 };
 
-/**
- * @description Update element data
- * @param {String} element element id
- * @param {Object} elementObj element data
- * @returns {Object} element data
- */
-export const updateElementById = async (
-  user: MongoID,
-  userObj: updateUserDTO
-) => {
-  if (!user) throw new ErrorHandler("Please enter user id!", 400);
+export const completeProfile = async (user: string, userObj: updateUserDTO) => {
+  const { firstName, lastName, image, gender, DOB } = userObj;
+  console.log(image);
+  if (!user) throw new Error('Please enter user id!|||400');
   if (!isValidObjectId(user))
-    throw new ErrorHandler("Please enter valid user id!", 400);
+    throw new Error('Please enter valid user id!|||400');
+  let userExists: any = await UserModel.findById(user);
+  if (!userExists) throw new Error('User not found!|||404');
+  if (firstName || lastName)
+    userExists.name = (firstName || '') + ' ' + (lastName || '');
+  if (image) userExists.image = image;
+  if (gender) userExists.gender = gender;
+  if (DOB) userExists.DOB = new Date(DOB);
+  await userExists.save();
+  return userExists;
+};
+
+/**
+ * @description Update user data
+ * @param {String} user user id
+ * @param {Object} userObj user data
+ * @returns {Object} user data
+ */
+export const updateUserById = async (user: MongoID, userObj: updateUserDTO) => {
+  if (!user) throw new ErrorHandler('Please enter user id!', 400);
+  if (!isValidObjectId(user))
+    throw new ErrorHandler('Please enter valid user id!', 400);
   const {
     password,
     firstName,
     lastName,
     image,
-    profile,
+    helper,
     coordinates,
     fcm,
     shallRemoveFCM,
     device,
   } = userObj;
 
-  if (!user) throw new ErrorHandler("Please enter user id!", 400);
+  if (!user) throw new ErrorHandler('Please enter user id!', 400);
   if (!isValidObjectId(user))
-    throw new ErrorHandler("Please enter valid user id!", 400);
+    throw new ErrorHandler('Please enter valid user id!', 400);
 
-  let userExists: any = await ElementModel.findById(user);
-  if (!userExists) throw new ErrorHandler("Element not found!", 404);
+  let userExists: any = await UserModel.findById(user);
+  if (!userExists) throw new ErrorHandler('user not found!', 404);
 
   if (password) {
     await userExists.setPassword(password);
@@ -70,24 +84,24 @@ export const updateElementById = async (
   if (fcm) {
     if (fcm?.token && fcm?.device) {
       let alreadyExists = false;
-      userExists.fcms.forEach((element: any) => {
-        if (element.device === fcm.device) {
+      userExists.fcms.forEach((user: any) => {
+        if (user.device === fcm.device) {
           alreadyExists = true;
-          element.token = fcm.token;
+          user.token = fcm.token;
         }
       });
       if (!alreadyExists)
         userExists.fcms.push({ device: fcm.device, token: fcm.token });
     } else
-      throw new ErrorHandler("Please enter FCM token and device both!", 400);
+      throw new ErrorHandler('Please enter FCM token and device both!', 400);
   }
   if (shallRemoveFCM)
     if (device)
       userExists.fcms = userExists.fcms.filter(
-        (element: any) => element?.device !== device
+        (user: any) => user?.device !== device
       );
   if (firstName || lastName)
-    userExists.name = (firstName || "") + " " + (lastName || "");
+    userExists.name = (firstName || '') + ' ' + (lastName || '');
   if (image) {
     if (userExists.image) new FilesRemover().remove([userExists.image]);
     userExists.image = image;
@@ -97,82 +111,78 @@ export const updateElementById = async (
       userExists.location.coordinates = coordinates;
     else
       throw new ErrorHandler(
-        "Please enter location longitude and latitude both!",
+        'Please enter location longitude and latitude both!',
         400
       );
   }
-  if (profile)
-    if (await profileController.checkElementExistence({ _id: profile })) {
-      userExists.profile = profile;
-    } else throw new ErrorHandler("Profile not found!", 404);
+  if (helper)
+    if (await helperController.checkHelperExistence({ _id: helper })) {
+      userExists.helper = helper;
+    } else throw new ErrorHandler('Profile not found!', 404);
 
   userExists = { ...userExists._doc, ...userObj };
-  userExists = await ElementModel.findByIdAndUpdate(
-    userExists._id,
-    userExists,
-    {
-      new: true,
-    }
-  ).select("-createdAt -updatedAt -__v");
-  if (!userExists) throw new ErrorHandler("user not found!", 404);
+  userExists = await UserModel.findByIdAndUpdate(userExists._id, userExists, {
+    new: true,
+  }).select('-createdAt -updatedAt -__v');
+  if (!userExists) throw new ErrorHandler('user not found!', 404);
   return userExists;
 };
 
 /**
- * @description Update element data
- * @param {Object} query element data
- * @param {Object} elementObj element data
- * @returns {Object} element data
+ * @description Update user data
+ * @param {Object} query user data
+ * @param {Object} userObj user data
+ * @returns {Object} user data
  */
-export const updateElement = async (
-  query: Partial<Element>,
-  elementObj: Partial<Element>
+export const updateUser = async (
+  query: Partial<User>,
+  userObj: Partial<User>
 ) => {
   if (!query || Object.keys(query).length === 0)
-    throw new ErrorHandler("Please enter query!", 400);
-  const elementExists = await ElementModel.findOneAndUpdate(query, elementObj, {
+    throw new ErrorHandler('Please enter query!', 400);
+  const userExists = await UserModel.findOneAndUpdate(query, userObj, {
     new: true,
   });
-  if (!elementExists) throw new ErrorHandler("element not found!", 404);
-  return elementExists;
+  if (!userExists) throw new ErrorHandler('user not found!', 404);
+  return userExists;
 };
 
 /**
- * @description Delete element
- * @param {String} element element id
- * @returns {Object} element data
+ * @description Delete user
+ * @param {String} user user id
+ * @returns {Object} user data
  */
-export const deleteElementById = async (element: MongoID) => {
-  if (!element) throw new ErrorHandler("Please enter element id!", 400);
-  if (!isValidObjectId(element))
-    throw new ErrorHandler("Please enter valid element id!", 400);
-  const elementExists = await ElementModel.findByIdAndDelete(element);
-  if (!elementExists) throw new ErrorHandler("element not found!", 404);
-  return elementExists;
+export const deleteUserById = async (user: MongoID) => {
+  if (!user) throw new ErrorHandler('Please enter user id!', 400);
+  if (!isValidObjectId(user))
+    throw new ErrorHandler('Please enter valid user id!', 400);
+  const userExists = await UserModel.findByIdAndDelete(user);
+  if (!userExists) throw new ErrorHandler('user not found!', 404);
+  return userExists;
 };
 
 /**
- * @description Get element
- * @param {String} element element id
- * @returns {Object} element data
+ * @description Get user
+ * @param {String} user user id
+ * @returns {Object} user data
  */
-export const getElementById = async (element: MongoID) => {
-  if (!element) throw new ErrorHandler("Please enter element id!", 400);
-  if (!isValidObjectId(element))
-    throw new ErrorHandler("Please enter valid element id!", 400);
-  const elementExists = await ElementModel.findById(element).select(
-    "-createdAt -updatedAt -__v"
+export const getUserById = async (user: MongoID) => {
+  if (!user) throw new ErrorHandler('Please enter user id!', 400);
+  if (!isValidObjectId(user))
+    throw new ErrorHandler('Please enter valid user id!', 400);
+  const userExists = await UserModel.findById(user).select(
+    '-createdAt -updatedAt -__v'
   );
-  if (!elementExists) throw new ErrorHandler("element not found!", 404);
-  return elementExists;
+  if (!userExists) throw new ErrorHandler('user not found!', 404);
+  return userExists;
 };
 
 /**
- * @description Get element
- * @param {Object} params element data
- * @returns {Object} element data
+ * @description Get user
+ * @param {Object} params user data
+ * @returns {Object} user data
  */
-export const getElement = async (params: getUserDTO) => {
+export const getUser = async (params: getUserDTO) => {
   const { user, email, phone, googleId, facebookId } = params;
   const query: any = {};
   if (user) query._id = user;
@@ -182,19 +192,21 @@ export const getElement = async (params: getUserDTO) => {
   if (phone) query.phone = phone;
   if (Object.keys(query).length === 0) query._id = null;
 
-  let userExists = await ElementModel.findOne(query).select(
-    "-createdAt -updatedAt -__v -fcms"
+  let userExists = await UserModel.findOne(query).select(
+    '-createdAt -updatedAt -__v -fcms'
   );
-  if (userExists) userExists = await userExists.populate(userExists.type);
+  if (userExists)
+    if (userExists?.helper)
+      userExists = await userExists.populate(userExists.type);
   return userExists;
 };
 
 /**
- * @description Get elements
- * @param {Object} params elements fetching parameters
- * @returns {Object[]} elements data
+ * @description Get users
+ * @param {Object} params users fetching parameters
+ * @returns {Object[]} users data
  */
-export const getElements = async (params: GetUsersDTO) => {
+export const getUsers = async (params: GetUsersDTO) => {
   const { type, user } = params;
   let { page, limit, keyword } = params;
   page = page - 1 || 0;
@@ -206,27 +218,27 @@ export const getElements = async (params: GetUsersDTO) => {
   if (user) query._id = { $ne: user };
   if (keyword) {
     keyword = keyword.trim();
-    if (keyword !== "")
+    if (keyword !== '')
       query.$or = [
-        { email: { $regex: keyword, $options: "i" } },
-        { name: { $regex: keyword, $options: "i" } },
+        { email: { $regex: keyword, $options: 'i' } },
+        { name: { $regex: keyword, $options: 'i' } },
       ];
   }
-  const [result] = await ElementModel.aggregate([
+  const [result] = await UserModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { password: 0, createdAt: 0, updatedAt: 0, __v: 0 } },
     {
       $facet: {
-        totalCount: [{ $count: "totalCount" }],
+        totalCount: [{ $count: 'totalCount' }],
         data: [{ $skip: page * limit }, { $limit: limit }],
       },
     },
-    { $unwind: "$totalCount" },
+    { $unwind: '$totalCount' },
     {
       $project: {
-        totalCount: "$totalCount.totalCount",
-        totalPages: { $ceil: { $divide: ["$totalCount.totalCount", limit] } },
+        totalCount: '$totalCount.totalCount',
+        totalPages: { $ceil: { $divide: ['$totalCount.totalCount', limit] } },
         data: 1,
       },
     },
@@ -235,14 +247,14 @@ export const getElements = async (params: GetUsersDTO) => {
 };
 
 /**
- * @description Check element existence
- * @param {Object} query element data
- * @returns {Boolean} element existence status
+ * @description Check user existence
+ * @param {Object} query user data
+ * @returns {Boolean} user existence status
  */
-export const checkElementExistence = async (query: Partial<Element>) => {
+export const checkUserExistence = async (query: Partial<User>) => {
   if (!query || Object.keys(query).length === 0)
-    throw new ErrorHandler("Please enter query!", 400);
-  return await ElementModel.exists(query);
+    throw new ErrorHandler('Please enter query!', 400);
+  return await UserModel.exists(query);
 };
 
 /**
@@ -251,13 +263,9 @@ export const checkElementExistence = async (query: Partial<Element>) => {
  * @returns {Object} user data
  */
 export const getUserProfile = async (params: getUserProfileDTO) => {
-  const { user, device } = params;
-  const userExists: any = await ElementModel.findById(user).select(
-    "-createdAt -updatedAt -__v"
+  const { user } = params;
+  const userExists: any = await UserModel.findById(user).select(
+    '-createdAt -updatedAt -__v'
   );
-  userExists.fcms.forEach((element: any) => {
-    if (element?.device === device) userExists._doc.fcm = element?.token;
-  });
-  delete userExists._doc.fcms;
   return userExists;
 };

@@ -2,9 +2,9 @@
 // import Stripe from "stripe";
 
 // file imports
-import * as paymentAccountController from "../modules/payment-account/controller";
-import * as userController from "../modules/user/controller";
-import { PAYMENT_ACCOUNT_TYPES } from "../configs/enum";
+import * as paymentAccountController from '../modules/payment-account/controller';
+import * as userController from '../modules/user/controller';
+import { PAYMENT_ACCOUNT_TYPES } from '../configs/enum';
 
 // destructuring assignments
 const { STRIPE_SECRET_KEY, STRIPE_ENDPOINT_SECRET } = process.env;
@@ -12,7 +12,7 @@ const { STRIPE_ACCOUNT, STRIPE_CUSTOMER } = PAYMENT_ACCOUNT_TYPES;
 
 // variable initializations
 // const stripe = new Stripe(STRIPE_SECRET_KEY || "");
-const CURRENCY = "usd";
+const CURRENCY = 'usd';
 
 class StripeManager {
   stripe: any;
@@ -33,8 +33,8 @@ class StripeManager {
     const { number, expMonth, expYear, cvc, name } = params;
     const card: any = {};
     if (number) card.number = number;
-    if (typeof expMonth === "number") card.expMonth = expMonth;
-    if (typeof expYear === "number") card.expYear = expYear;
+    if (typeof expMonth === 'number') card.expMonth = expMonth;
+    if (typeof expYear === 'number') card.expYear = expYear;
     if (cvc) card.cvc = cvc;
     if (name) card.name = name;
     // return await stripe.tokens.create({ card });
@@ -72,10 +72,10 @@ class StripeManager {
    */
   async createAllCustomers() {
     const query: any = { limit: Math.pow(2, 32) };
-    const { data: users } = await userController.getElements(query);
+    const { data: users } = await userController.getUsers(query);
     for (let index = 0; index < users.length; index++) {
       const element = users[index];
-      const id = "";
+      const id = '';
       await this.createCustomer({
         id: element?._id.toString(),
         email: element?.email,
@@ -242,9 +242,9 @@ class StripeManager {
     }
     const accountLinkObj = {
       account: account ?? accountObj.id,
-      refresh_url: refreshURL ?? "https://app.page.link/stripefailed",
-      return_url: returnURL ?? "https://app.page.link/stripesuccess",
-      type: "account_onboarding",
+      refresh_url: refreshURL ?? 'https://app.page.link/stripefailed',
+      return_url: returnURL ?? 'https://app.page.link/stripesuccess',
+      type: 'account_onboarding',
     };
     // return await stripe.accountLinks.create(accountLinkObj);
   }
@@ -307,8 +307,8 @@ class StripeManager {
       params;
     const paymentIntentObj: any = {
       amount: Number(amount * 100).toFixed(0),
-      currency: currency ?? "usd",
-      setup_future_usage: "on_session",
+      currency: currency ?? 'usd',
+      setup_future_usage: 'on_session',
       customer,
     };
     if (paymentMethod) paymentIntentObj.payment_method = paymentMethod;
@@ -408,15 +408,15 @@ class StripeManager {
 
 export const constructWebhooksEvent = async (params: any) => {
   const { request } = params;
-  const signature = request.headers["stripe-signature"];
-  console.log("SIGNATURE: ", JSON.stringify(signature));
+  const signature = request.headers['stripe-signature'];
+  console.log('SIGNATURE: ', JSON.stringify(signature));
 
   const args = { rawBody: request.body };
 
   const event = await new StripeManager().constructWebhooksEvent(args);
 
   return {
-    message: "Done",
+    message: 'Done',
     event,
   };
 };

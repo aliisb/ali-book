@@ -1,23 +1,23 @@
 // module imports
 
 // file imports
-import FirebaseManager from "../../utils/firebase-manager";
-import SocketManager from "../../utils/socket-manager";
-import ElementModel from "./model";
-import * as userController from "../user/controller";
-import { Element } from "./interface";
-import { MongoID } from "../../configs/types";
-import { ErrorHandler } from "../../middlewares/error-handler";
+import FirebaseManager from '../../utils/firebase-manager';
+import SocketManager from '../../utils/socket-manager';
+import ElementModel from './model';
+import * as userController from '../user/controller';
+import { Element } from './interface';
+import { MongoID } from '../../configs/types';
+import { ErrorHandler } from '../../middlewares/error-handler';
 import {
   GetNotificationsDTO,
   NotifyUsersDTO,
   sendNotificationsDTO,
-} from "./dto";
+} from './dto';
 import {
   NOTIFICATION_STATUSES,
   NOTIFICATION_TYPES,
   SOCKET_EVENTS,
-} from "../../configs/enum";
+} from '../../configs/enum';
 
 // destructuring assignments
 const { READ } = NOTIFICATION_STATUSES;
@@ -60,17 +60,17 @@ export const getElements = async (params: GetNotificationsDTO) => {
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
     {
       $facet: {
-        totalCount: [{ $count: "totalCount" }],
+        totalCount: [{ $count: 'totalCount' }],
         data: [{ $skip: page * limit }, { $limit: limit }],
       },
     },
-    { $unwind: "$totalCount" },
+    { $unwind: '$totalCount' },
     {
       $project: {
-        totalCount: "$totalCount.totalCount",
+        totalCount: '$totalCount.totalCount',
         totalPages: {
           $ceil: {
-            $divide: ["$totalCount.totalCount", limit],
+            $divide: ['$totalCount.totalCount', limit],
           },
         },
         data: 1,
@@ -108,7 +108,7 @@ export const notifyUsers = async (params: NotifyUsersDTO): Promise<void> => {
     if (useFirebase) {
       const queryObj: any = query ?? {};
       queryObj.limit = Math.pow(2, 32);
-      const { data } = await userController.getElements(queryObj);
+      const { data } = await userController.getUsers(queryObj);
       usersExist = data;
       usersExist.forEach(async (element: any) => {
         element.fcms.forEach((e: any) => fcms.push(e.token));
@@ -119,7 +119,7 @@ export const notifyUsers = async (params: NotifyUsersDTO): Promise<void> => {
       await new SocketManager().emitGroupEvent({ event, data: socketData });
   } else {
     if (useFirebase) {
-      const userExists = await userController.getElementById(user || "");
+      const userExists = await userController.getUserById(user || '');
       userExists?.fcms.forEach((e: any) => fcms.push(e.token));
     }
     if (useSocket)
@@ -157,9 +157,9 @@ export const notifyUsers = async (params: NotifyUsersDTO): Promise<void> => {
  */
 export const readNotifications = async (user: MongoID): Promise<void> => {
   const notificationObj = { status: READ };
-  if (!user) throw new ErrorHandler("Please enter user id!", 400);
-  if (!(await userController.checkElementExistence({ _id: user })))
-    throw new ErrorHandler("Please enter valid user id!", 400);
+  if (!user) throw new ErrorHandler('Please enter user id!', 400);
+  if (!(await userController.checkUserExistence({ _id: user })))
+    throw new ErrorHandler('Please enter valid user id!', 400);
   await ElementModel.updateMany({ user }, notificationObj);
 };
 
@@ -178,7 +178,7 @@ export const sendNewMessageNotification = async (
     event: NEW_MESSAGE_ + messageData?.conversation,
     socketData: messageData,
     useFirebase: true,
-    title: "New Message",
+    title: 'New Message',
     body: `New message from ${username}`,
     useDatabase: true,
     notificationData,

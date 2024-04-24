@@ -1,11 +1,11 @@
 // file imports
-import { MongoID } from "../../configs/types";
-import { USER_TYPES } from "../../configs/enum";
+import { MongoID } from '../../configs/types';
+import { USER_TYPES } from '../../configs/enum';
 
 export type LoginDTO = {
   email: string;
   password: string;
-  type: USER_TYPES;
+  type?: USER_TYPES;
 };
 
 export type SendEmailDTO = {

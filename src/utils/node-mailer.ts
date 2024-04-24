@@ -1,25 +1,24 @@
 // module imports
-// import nodemailer from "nodemailer";
-// import { google } from "googleapis";
+import nodemailer from 'nodemailer';
+import { google } from 'googleapis';
 
 // destructuring assignments
 const { BASE_URL, EMAIL_USER, PASS_APP, APP_TITLE } = process.env;
 
 // variable initializations
-// const transporter = nodemailer.createTransport({
-//   host: "smtp.gmail.com",
-//   port: 587,
-//   secure: false, // true for 465, false for other ports
-//   auth: {
-//     user: EMAIL_USER,
-//     pass: PASS_APP,
-//   },
-// });
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'test303email@gmail.com',
+    pass: 'bfyd mjvv ywbt ljta',
+  },
+});
 
 class NodeMailer {
   transporter: any;
   constructor() {
-    // this.transporter = transporter;
+    this.transporter = transporter;
   }
 
   /**
@@ -30,15 +29,15 @@ class NodeMailer {
    * @param {Object} html email html
    * @returns {Object} email response
    */
-  async sendEmail(params: any) {
+  sendEmail(params: any) {
     const { to, subject, text, html } = params;
-    // return await transporter.sendMail({
-    //   from: `BACKEND BOILERPLATE <${EMAIL_USER}>`,
-    //   to,
-    //   subject,
-    //   text,
-    //   html,
-    // });
+    return transporter.sendMail({
+      from: 'test303email@gmail.com',
+      to: 'aliisb303@gmail.com',
+      subject,
+      text,
+      html,
+    });
   }
 
   /**

@@ -1,9 +1,9 @@
 // module imports
-import multer from "multer";
-import { v4 } from "uuid";
+import multer from 'multer';
+import { v4 } from 'uuid';
 
 // file imports
-import { PUBLIC_DIRECTORY } from "../configs/directories";
+import { PUBLIC_DIRECTORY } from '../configs/directories';
 
 export const upload = (directory = PUBLIC_DIRECTORY) => {
   return multer({

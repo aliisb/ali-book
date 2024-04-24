@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 const model = mongoose.model;
 
-const profileSchema = new Schema(
+const helperSchema = new Schema(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -19,4 +19,4 @@ const profileSchema = new Schema(
   }
 );
 
-export default model('profile', profileSchema);
+export default model('helpers', helperSchema);

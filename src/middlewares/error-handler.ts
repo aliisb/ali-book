@@ -1,5 +1,5 @@
 // module imports
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 
 export class ErrorHandler extends Error {
   statusCode: number;
@@ -10,16 +10,16 @@ export class ErrorHandler extends Error {
 }
 
 const error = (err: any, _req: Request, res: Response, _next: NextFunction) => {
-  let error = { ...err };
+  let error = err;
 
   console.error(err);
 
-  if (err.name === "CastError") {
+  if (err.name === 'CastError') {
     const message = `Cast failed for value ${err.value}`;
     error = new ErrorHandler(message, 400);
   }
 
-  if (err.name === "ValidationError") {
+  if (err.name === 'ValidationError') {
     const message = Object.values(err.errors).map((e: any) => e.message);
     error = new ErrorHandler(message.toString(), 400);
   }
@@ -33,7 +33,7 @@ const error = (err: any, _req: Request, res: Response, _next: NextFunction) => {
   }
 
   res.status(Number(error?.statusCode) || 500).json({
-    error: error.message || "Server Error",
+    error: error.message || 'Server Error',
   });
 };
 export default error;

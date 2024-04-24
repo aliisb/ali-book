@@ -3,9 +3,9 @@
 // import otpGenerator from "otp-generator";
 
 // file imports
-import * as userController from "../modules/user/controller";
-import { getToken } from "../middlewares/authenticator";
-import { ErrorHandler } from "../middlewares/error-handler";
+import * as userController from '../modules/user/controller';
+import { getToken } from '../middlewares/authenticator';
+import { ErrorHandler } from '../middlewares/error-handler';
 
 // destructuring assignments
 const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, APP_TITLE } = process.env;
@@ -28,21 +28,21 @@ class TwilioManager {
   async sendOTP(params: any) {
     const { user, phone, phoneCode } = params;
 
-    if (!phone) throw new ErrorHandler("Please enter phone number!", 400);
+    if (!phone) throw new ErrorHandler('Please enter phone number!', 400);
 
     const query: any = {};
     if (user) query.user = user;
     else query.phone = phone;
 
-    const userExists = await userController.getElement(query);
+    const userExists = await userController.getUser(query);
 
-    const otp = "111111";
+    const otp = '111111';
     // const otp = otpGenerator.generate(6, {
     //   specialChars: false,
     //   lowerCaseAlphabets: false,
     //   upperCaseAlphabets: false,
     // });
-    console.log("OTP -->", otp);
+    console.log('OTP -->', otp);
     const message = `${APP_TITLE} verification code is: ${otp}`;
     await this.send({ phone, message });
     const tokenObj: any = {
@@ -66,7 +66,7 @@ class TwilioManager {
    */
   async send(params: any) {
     const { phone, message } = params;
-    if (!phone) throw new ErrorHandler("Please enter phone number!", 400);
+    if (!phone) throw new ErrorHandler('Please enter phone number!', 400);
     try {
       // await client.messages.create({
       //   body: message,
@@ -74,7 +74,7 @@ class TwilioManager {
       //   to: phone,
       // });
     } catch (error) {
-      console.log("Twilio Error =>", error);
+      console.log('Twilio Error =>', error);
     }
   }
 }
