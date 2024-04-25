@@ -51,12 +51,14 @@ router.put(
   '/:postID',
   verifyToken,
   verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
+  exceptionHandler(async (req: IRequest, res: Response) => {
     let { postID } = req.params;
+    const userId = req.user._id;
     const { content } = req.body;
     const args = { content };
     postID = postID?.toString() || '';
-    const response = await postController.updatePostById(postID, args);
+    const query = { _id: postID, user: userId };
+    const response = await postController.updatePost(query, args);
     res.json(response);
   })
 );

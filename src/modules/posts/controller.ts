@@ -18,7 +18,6 @@ import { ErrorHandler } from '../../middlewares/error-handler';
  * @returns {Object} element data
  */
 export const addPost = async (params: IPost) => {
-  const { user } = params;
   return await PostModel.create(params);
 };
 
@@ -49,8 +48,8 @@ export const updatePostById = async (
  * @returns {Object} element data
  */
 export const updatePost = async (
-  query: Partial<Element>,
-  elementObj: Partial<Element>
+  query: Partial<IPost>,
+  elementObj: Partial<IPost>
 ) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler('Please enter query!', 400);
