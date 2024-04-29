@@ -13,7 +13,7 @@ import { USER_STATUSES, USER_TYPES } from '../configs/enum';
 // destructuring assignments
 const { JWT_SECRET, API_KEY } = process.env;
 const { ACTIVE, DELETED } = USER_STATUSES;
-const { CUSTOMER, ADMIN, SUPER_ADMIN } = USER_TYPES;
+const { HELPER, ADMIN, SUPER_ADMIN } = USER_TYPES;
 
 /**
  * @description Get JWT token
@@ -108,13 +108,9 @@ export const verifySuperAdmin = (
   else next(new ErrorHandler('Unauthorized as super-admin!', 403));
 };
 
-export const verifyCustomer = (
-  req: IRequest,
-  _res: object,
-  next: any
-): void => {
-  if (req.user?.type === CUSTOMER && req.user?.status === ACTIVE) next();
-  else next(new ErrorHandler('Unauthorized as customer!', 403));
+export const verifyHelper = (req: IRequest, _res: object, next: any): void => {
+  if (req.user?.type === HELPER && req.user?.status === ACTIVE) next();
+  else next(new ErrorHandler('Unauthorized as Helper!', 403));
 };
 
 export const verifyUser = (req: IRequest, _res: object, next: any): void => {

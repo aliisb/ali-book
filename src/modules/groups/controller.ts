@@ -2,9 +2,9 @@
 import { isValidObjectId } from 'mongoose';
 
 // file imports
-import PostModel from './model';
-import { IPost } from './interface';
-import { GetPostsDTO } from './dto';
+import GroupModel from './model';
+import { Element } from './interface';
+import { GetElementsDTO } from './dto';
 import { MongoID } from '../../configs/types';
 import { ErrorHandler } from '../../middlewares/error-handler';
 
@@ -17,8 +17,8 @@ import { ErrorHandler } from '../../middlewares/error-handler';
  * @param {Object} elementObj element data
  * @returns {Object} element data
  */
-export const addPost = async (params: IPost) => {
-  return await PostModel.create(params);
+export const createGroup = async (elementObj: Element) => {
+  return await GroupModel.create(elementObj);
 };
 
 /**
@@ -27,16 +27,18 @@ export const addPost = async (params: IPost) => {
  * @param {Object} elementObj element data
  * @returns {Object} element data
  */
-export const updatePostById = async (
+export const updateElementById = async (
   element: MongoID,
-  elementObj: Partial<IPost>
+  elementObj: Partial<Element>
 ) => {
   if (!element) throw new ErrorHandler('Please enter element id!', 400);
   if (!isValidObjectId(element))
     throw new ErrorHandler('Please enter valid element id!', 400);
-  const elementExists = await PostModel.findByIdAndUpdate(element, elementObj, {
-    new: true,
-  });
+  const elementExists = await GroupModel.findByIdAndUpdate(
+    element,
+    elementObj,
+    { new: true }
+  );
   if (!elementExists) throw new ErrorHandler('element not found!', 404);
   return elementExists;
 };
@@ -47,13 +49,13 @@ export const updatePostById = async (
  * @param {Object} elementObj element data
  * @returns {Object} element data
  */
-export const updatePost = async (
-  query: Partial<IPost>,
-  elementObj: Partial<IPost>
+export const updateElement = async (
+  query: Partial<Element>,
+  elementObj: Partial<Element>
 ) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler('Please enter query!', 400);
-  const elementExists = await PostModel.findOneAndUpdate(query, elementObj, {
+  const elementExists = await GroupModel.findOneAndUpdate(query, elementObj, {
     new: true,
   });
   if (!elementExists) throw new ErrorHandler('element not found!', 404);
@@ -65,11 +67,11 @@ export const updatePost = async (
  * @param {String} element element id
  * @returns {Object} element data
  */
-export const deletePostById = async (element: MongoID) => {
+export const deleteElementById = async (element: MongoID) => {
   if (!element) throw new ErrorHandler('Please enter element id!', 400);
   if (!isValidObjectId(element))
     throw new ErrorHandler('Please enter valid element id!', 400);
-  const elementExists = await PostModel.findByIdAndDelete(element);
+  const elementExists = await GroupModel.findByIdAndDelete(element);
   if (!elementExists) throw new ErrorHandler('element not found!', 404);
   return elementExists;
 };
@@ -79,10 +81,10 @@ export const deletePostById = async (element: MongoID) => {
  * @param {String} query element data
  * @returns {Object} element data
  */
-export const deletePost = async (query: Partial<Element>) => {
+export const deleteElement = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler('Please enter query!', 400);
-  const elementExists = await PostModel.findOneAndDelete(query);
+  const elementExists = await GroupModel.findOneAndDelete(query);
   if (!elementExists) throw new ErrorHandler('element not found!', 404);
   return elementExists;
 };
@@ -92,11 +94,11 @@ export const deletePost = async (query: Partial<Element>) => {
  * @param {String} element element id
  * @returns {Object} element data
  */
-export const getPostById = async (element: MongoID) => {
+export const getElementById = async (element: MongoID) => {
   if (!element) throw new ErrorHandler('Please enter element id!', 400);
   if (!isValidObjectId(element))
     throw new ErrorHandler('Please enter valid element id!', 400);
-  const elementExists = await PostModel.findById(element).select(
+  const elementExists = await GroupModel.findById(element).select(
     '-createdAt -updatedAt -__v'
   );
   if (!elementExists) throw new ErrorHandler('element not found!', 404);
@@ -108,10 +110,10 @@ export const getPostById = async (element: MongoID) => {
  * @param {Object} query element data
  * @returns {Object} element data
  */
-export const getPost = async (query: Partial<IPost>) => {
+export const getElement = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler('Please enter query!', 400);
-  const elementExists = await PostModel.findOne(query).select(
+  const elementExists = await GroupModel.findOne(query).select(
     '-createdAt -updatedAt -__v'
   );
   if (!elementExists) throw new ErrorHandler('element not found!', 404);
@@ -123,12 +125,12 @@ export const getPost = async (query: Partial<IPost>) => {
  * @param {Object} params elements fetching parameters
  * @returns {Object[]} elements data
  */
-export const getPosts = async (params: GetPostsDTO) => {
+export const getElements = async (params: GetElementsDTO) => {
   let { limit, page } = params;
   page = page - 1 || 0;
   limit = limit || 10;
   const query: any = {};
-  const [result] = await PostModel.aggregate([
+  const [result] = await GroupModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
@@ -155,10 +157,10 @@ export const getPosts = async (params: GetPostsDTO) => {
  * @param {Object} query element data
  * @returns {Boolean} element existence status
  */
-export const checkPostExistence = async (query: Partial<Element>) => {
+export const checkElementExistence = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler('Please enter query!', 400);
-  return await PostModel.exists(query);
+  return await GroupModel.exists(query);
 };
 
 /**
@@ -166,8 +168,8 @@ export const checkPostExistence = async (query: Partial<Element>) => {
  * @param {Object} query element data
  * @returns {Number} elements count
  */
-export const countPosts = async (query: Partial<Element>) => {
+export const countElements = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler('Please enter query!', 400);
-  return await PostModel.countDocuments(query);
+  return await GroupModel.countDocuments(query);
 };

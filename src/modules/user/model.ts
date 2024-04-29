@@ -127,6 +127,14 @@ const userSchema = new Schema(
       type: String,
       trim: true,
     },
+    following: {
+      type: Number,
+      default: 0,
+    },
+    followers: {
+      type: Number,
+      default: 0,
+    },
     facebookId: {
       type: String,
       trim: true,
