@@ -5,7 +5,6 @@ import { isValidObjectId } from 'mongoose';
 import FriendRequestModel from './model';
 import User from '../user/model';
 import { IFriendRequest } from './interface';
-import { GetfriendrequestsDTO } from './dto';
 import { MongoID } from '../../configs/types';
 import { ErrorHandler } from '../../middlewares/error-handler';
 
@@ -57,17 +56,9 @@ export const getfriendrequestById = async (userId: MongoID) => {
   if (!isValidObjectId(userId))
     throw new ErrorHandler('Please enter valid user id!', 400);
 
-  const friendrequestExists = await FriendRequestModel.aggregate([
-    {
-      $match: { receiver: userId }, // Match friend requests where the receiver is the current user
-    },
-    {
-      $group: {
-        _id: '$receiver',
-        friendRequests: { $push: '$$ROOT' }, // Group friend requests into an array
-      },
-    },
-  ]);
+  const friendrequestExists = await FriendRequestModel.find({
+    receiver: userId,
+  });
   if (!friendrequestExists)
     throw new ErrorHandler('friendrequest not found!', 404);
   return friendrequestExists;
@@ -78,14 +69,14 @@ export const updatefriendrequestById = async (
   args: Partial<IFriendRequest>
 ) => {
   const friendrequestObj = args;
-  console.log(friendrequestObj);
+  // console.log(friendrequestObj);
   if (!friendrequest)
     throw new ErrorHandler('Please enter friendrequest id!', 400);
   if (!isValidObjectId(friendrequest))
     throw new ErrorHandler('Please enter valid friendrequest id!', 400);
   const friendrequestExists = await FriendRequestModel.findByIdAndUpdate(
     friendrequest,
-    args,
+    friendrequestObj,
     { new: true }
   );
   if (!friendrequestExists)

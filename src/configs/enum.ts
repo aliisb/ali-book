@@ -47,6 +47,11 @@ export enum FRIENDSHIP_STATUS {
   ACCEPTED = 'accepted',
 }
 
+export enum MEMBERSHIP_STATUS {
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+}
+
 export enum CONVERSATION_STATUSES {
   PENDING = 'pending',
   ACCEPTED = 'accepted',

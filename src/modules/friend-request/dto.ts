@@ -1,4 +1,4 @@
-export type GetfriendrequestsDTO = {
+export type GetJoinrequestsDTO = {
   limit: number;
   page: number;
   userId?: string;

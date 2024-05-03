@@ -65,4 +65,44 @@ router.get(
     res.json(response);
   })
 );
+
+router.get(
+  '/other-followers',
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const userId = req.user._id;
+    let { limit, page, otherUserId } = req.query;
+    otherUserId = otherUserId?.toString() || '';
+    const args = {
+      otherUserId,
+      limit: Number(limit),
+      page: Number(page),
+      userId,
+    };
+    console.log(otherUserId);
+    const response = await followController.getOtherUserFollowers(args);
+    res.json(response);
+  })
+);
+
+router.get(
+  '/other-following',
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    let { limit, page, otherUserId } = req.query;
+    const userId = req.user._id;
+    otherUserId = otherUserId?.toString() || '';
+    const args = {
+      otherUserId,
+      limit: Number(limit),
+      page: Number(page),
+      userId,
+    };
+
+    const response = await followController.getOtherUserFollowing(args);
+    res.json(response);
+  })
+);
 export default router;

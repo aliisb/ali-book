@@ -2,7 +2,7 @@
 import { MongoID } from '../../configs/types';
 
 export interface IFriendRequest {
-  userId?: MongoID;
+  // userId?: MongoID;
   sender: MongoID;
   receiver: string;
 }

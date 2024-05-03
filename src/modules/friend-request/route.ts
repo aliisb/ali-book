@@ -26,18 +26,17 @@ router.post(
     const { receiver } = req.params;
     // Call the controller function to send the friend request
     const args = { sender, receiver };
-
     const friendRequest = await friendrequestController.createRequest(args);
     res.json(friendRequest);
   })
 );
 
 router.get(
-  '/:receiver',
+  '/',
   verifyToken,
   verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    const { receiver } = req.params;
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const receiver = req.user._id;
     const friendRequests = await friendrequestController.getfriendrequestById(
       receiver
     );
@@ -51,8 +50,8 @@ router.put(
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
     let { friendrequest } = req.params;
-    // const { status } = req.body;
-    const args: any = { ACCEPTED };
+    const status = ACCEPTED;
+    const args: any = { status };
     friendrequest = friendrequest?.toString() || '';
     const response = await friendrequestController.updatefriendrequestById(
       friendrequest,

@@ -135,3 +135,73 @@ export const getMyFollowing = async (params: GetfollowDTO) => {
 
   return following;
 };
+
+export const getOtherUserFollowers = async (params: GetfollowDTO) => {
+  let { page, limit, userId, otherUserId } = params;
+
+  page = page - 1 || 0;
+  limit = limit || 10;
+
+  const followers = await FollowModel.aggregate([
+    {
+      $match: { following: new mongoose.Types.ObjectId(otherUserId) },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'follower',
+        foreignField: '_id',
+        as: 'followerInfo',
+      },
+    },
+    {
+      $unwind: '$followerInfo',
+    },
+    {
+      $project: {
+        _id: '$followerInfo._id',
+        email: '$followerInfo.email',
+        name: '$followerInfo.name',
+      },
+    },
+  ]);
+
+  if (!followers) throw new Error('Error while fetching followers');
+
+  return followers;
+};
+
+export const getOtherUserFollowing = async (params: GetfollowDTO) => {
+  let { page, limit, userId } = params;
+
+  page = page - 1 || 0;
+  limit = limit || 10;
+
+  const following = await FollowModel.aggregate([
+    {
+      $match: { follower: new mongoose.Types.ObjectId(userId) },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'following',
+        foreignField: '_id',
+        as: 'followingInfo',
+      },
+    },
+    {
+      $unwind: '$followingInfo',
+    },
+    {
+      $project: {
+        _id: '$followingInfo._id',
+        email: '$followingInfo.email',
+        name: '$followingInfo.name',
+      },
+    },
+  ]);
+
+  if (!following) throw new Error('Error while fetching followers');
+
+  return following;
+};
