@@ -4,11 +4,12 @@ import userModel from '../user/model';
 import FollowModel from './model';
 import { IFollow } from './interface';
 import { GetfollowDTO } from './dto';
+import { ErrorHandler } from '../../middlewares/error-handler';
 
 export const addFollow = async (params: IFollow) => {
   const { following, follower } = params;
   if (follower == following) {
-    throw new Error('can not follow user himself|||400');
+    throw new ErrorHandler('can not follow user himself|||', 400);
   }
   const existingFollow = await FollowModel.findOne({
     follower: follower,
@@ -96,7 +97,7 @@ export const getMyFollowers = async (params: GetfollowDTO) => {
     },
   ]);
 
-  if (!followers) throw new Error('Error while fetching followers');
+  if (!followers) throw new ErrorHandler('Error while fetching followers');
 
   return followers;
 };
@@ -131,7 +132,7 @@ export const getMyFollowing = async (params: GetfollowDTO) => {
     },
   ]);
 
-  if (!following) throw new Error('Error while fetching followers');
+  if (!following) throw new ErrorHandler('Error while fetching followers');
 
   return following;
 };
@@ -166,7 +167,7 @@ export const getOtherUserFollowers = async (params: GetfollowDTO) => {
     },
   ]);
 
-  if (!followers) throw new Error('Error while fetching followers');
+  if (!followers) throw new ErrorHandler('Error while fetching followers');
 
   return followers;
 };
@@ -201,7 +202,7 @@ export const getOtherUserFollowing = async (params: GetfollowDTO) => {
     },
   ]);
 
-  if (!following) throw new Error('Error while fetching followers');
+  if (!following) throw new ErrorHandler('Error while fetching followers');
 
   return following;
 };

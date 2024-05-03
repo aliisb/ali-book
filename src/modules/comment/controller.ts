@@ -3,6 +3,7 @@ import mongoose, { isValidObjectId } from 'mongoose';
 import CommentModel from './model';
 import PostModel from '../posts/model';
 import { IComment } from './interface';
+import { ErrorHandler } from '../../middlewares/error-handler';
 import { GetCommentsDTO } from './dto';
 
 export const addComment = async (commentObj: IComment) => {
@@ -16,35 +17,35 @@ export const updateCommentById = async (
   comment: string,
   commentObj: Partial<IComment>
 ) => {
-  if (!comment) throw new Error('Please enter comment id!|||400');
+  if (!comment) throw new ErrorHandler('Please enter comment id!', 404);
   if (!isValidObjectId(comment))
-    throw new Error('Please enter valid comment id!|||400');
+    throw new ErrorHandler('Please enter valid comment id!', 404);
   const commentExists = await CommentModel.findByIdAndUpdate(
     comment,
     commentObj,
     { new: true }
   );
-  if (!commentExists) throw new Error('comment not found!|||404');
+  if (!commentExists) throw new ErrorHandler('comment not found!', 404);
   return commentExists;
 };
 
 export const deleteComment = async (comment: string) => {
-  if (!comment) throw new Error('Please enter comment id!|||400');
+  if (!comment) throw new ErrorHandler('Please enter comment id!', 404);
   if (!isValidObjectId(comment))
-    throw new Error('Please enter valid comment id!|||400');
+    throw new ErrorHandler('Please enter valid comment id!404');
   const commentExists = await CommentModel.findByIdAndDelete(comment);
-  if (!commentExists) throw new Error('comment not found!|||404');
+  if (!commentExists) throw new ErrorHandler('comment not found!', 404);
   return commentExists;
 };
 
 export const getComment = async (comment: string) => {
-  if (!comment) throw new Error('Please enter comment id!|||400');
+  if (!comment) throw new ErrorHandler('Please enter comment id!', 404);
   if (!isValidObjectId(comment))
-    throw new Error('Please enter valid comment id!|||400');
+    throw new ErrorHandler('Please enter valid comment id!404');
   const commentExists = await CommentModel.findById(comment).select(
     '-createdAt -updatedAt -__v'
   );
-  if (!commentExists) throw new Error('comment not found!|||404');
+  if (!commentExists) throw new ErrorHandler('comment not found!|||', 404);
   return commentExists;
 };
 

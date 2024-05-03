@@ -45,8 +45,6 @@ export const createRequest = async (params: IFriendRequest) => {
     sender: sender,
     receiver: receiver,
   });
-
-  await newFriendRequest.save();
   return newFriendRequest;
 };
 
