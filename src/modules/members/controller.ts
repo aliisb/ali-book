@@ -6,7 +6,6 @@ import MemberModel from './model';
 import User from '../user/model';
 import Group from '../groups/model';
 import { IMember } from './interface';
-import { GetElementsDTO } from './dto';
 import { MongoID } from '../../configs/types';
 import { ErrorHandler } from '../../middlewares/error-handler';
 
@@ -15,12 +14,12 @@ export const joinRequest = async (params: IMember) => {
   // Check if the user and group exist
   const userExists = await User.findById(userId);
   if (!userExists) {
-    throw new Error('user does not exist');
+    throw new ErrorHandler('user does not exist');
   }
 
   const groupExists = await Group.findById(groupId);
   if (!groupExists) {
-    throw new Error('group does not exist');
+    throw new ErrorHandler('group does not exist');
   }
 
   // Check if a request already exists between the user and group
@@ -30,7 +29,7 @@ export const joinRequest = async (params: IMember) => {
   });
 
   if (existingRequest) {
-    throw new Error('Join request already sent');
+    throw new ErrorHandler('Join request already sent');
   }
 
   // Create a new friend request
@@ -50,24 +49,24 @@ export const getJoinRequestById = async (groupId: MongoID) => {
     throw new ErrorHandler('Please enter valid user id!', 400);
   const joinRequestExists = await MemberModel.find({ group: groupId });
   if (!joinRequestExists)
-    throw new ErrorHandler('friendrequest not found!', 404);
+    throw new ErrorHandler('Join request not found!', 404);
   return joinRequestExists;
 };
 
 export const updateJoinRequestById = async (
   joinRequest: MongoID,
-  args: Partial<IMember>
+  joinRequestObj: Partial<IMember>
 ) => {
-  const joinrequestObj = args;
-  if (!joinRequest) throw new ErrorHandler('Please enter joinrequest id!', 400);
+  if (!joinRequest)
+    throw new ErrorHandler('Please enter join request id!', 400);
   if (!isValidObjectId(joinRequest))
-    throw new ErrorHandler('Please enter valid friendrequest id!', 400);
+    throw new ErrorHandler('Please enter valid join request id!', 400);
   const joinRequestExists = await MemberModel.findByIdAndUpdate(
     joinRequest,
-    joinrequestObj,
+    joinRequestObj,
     { new: true }
   );
   if (!joinRequestExists)
-    throw new ErrorHandler('friendrequest not found!', 404);
+    throw new ErrorHandler('join request not found!', 404);
   return joinRequestExists;
 };

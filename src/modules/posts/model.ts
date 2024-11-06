@@ -12,6 +12,16 @@ const postSchema = new Schema(
       ref: 'users',
     },
 
+    page: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'page',
+    },
+
+    group: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'group',
+    },
+
     media: {
       type: String,
       // required: true,

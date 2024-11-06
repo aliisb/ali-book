@@ -23,9 +23,15 @@ router
   .all(verifyToken, verifyUser)
   .post(
     exceptionHandler(async (req: IRequest, res: Response) => {
+      const { pageId, groupId } = req.query;
       const { content } = req.body;
       const user = req.user._id;
       const args: any = { content, user };
+      if (pageId) {
+        args.page = pageId;
+      } else if (groupId) {
+        args.group = groupId;
+      }
       const response = await postController.addPost(args);
       res.json(response);
     })

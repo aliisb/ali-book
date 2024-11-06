@@ -6,4 +6,6 @@ export interface IPost {
   content: string;
   media: string;
   _id?: string;
+  page?: MongoID;
+  group?: MongoID;
 }
